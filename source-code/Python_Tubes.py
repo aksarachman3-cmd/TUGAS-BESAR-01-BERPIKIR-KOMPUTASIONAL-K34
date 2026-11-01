@@ -104,127 +104,126 @@ validasi_input                  = konsep validasi nilai yang dimasukkan pengguna
 
 PENJELASAN SUB PROGRAM
 
-cetak_grid
-Fungsi ini bertanggung jawab menampilkan seluruh kondisi simulasi ke layar. Yang
-ditampilkan bukan cuma grid 10x10 dengan emoji, tapi juga informasi pendukung:
-jumlah pohon untuk setiap kondisi (selamat, terbakar, hangus, padam, basah), posisi
-dan status truk, target truk saat ini beserta ETA (perkiraan berapa tick lagi truk
-sampai di target), dan juga sisa tick sampai api menyebar lagi. Tujuannya supaya
-pengguna bisa menganalisis apa yang terjadi di tick tersebut tanpa harus mengingat
-angka-angka sebelumnya.
+Dalam pembuatannya, program ini memanfaatkan sejumlah sub program agar kode tidak menumpuk pada satu bagian saja. Sub program yang digunakan terdiri dari fungsi untuk tampilan, fungsi perhitungan, fungsi pengubah data pohon, serta fungsi pengendali truk pemadam.
 
-mencari_jarak
-Fungsi kecil yang menghitung jarak Manhattan antara dua titik pada grid. Jarak
-Manhattan artinya jumlah selisih baris ditambah selisih kolom. Fungsi ini dipakai
-di beberapa tempat, terutama untuk menentukan pohon mana yang paling dekat dengan
-truk dan untuk menghitung ETA di cetak_grid.
+1) Fungsi Tampilan
 
-dalam_grid
-Fungsi pengaman yang memeriksa apakah sebuah posisi (baris, kolom) masih berada di
-dalam batas grid 10x10 atau sudah keluar. Fungsi ini wajib dipanggil sebelum
-mengakses grid dengan indeks apapun, karena kalau tidak, akses ke luar batas akan
-menyebabkan error (atau lebih berbahaya lagi, Python akan mengartikan indeks negatif
-sebagai akses dari belakang, yang bisa membuat bug sulit dilacak).
+i. cetak_grid
+Fungsi ini bertanggung jawab menampilkan seluruh kondisi simulasi ke layar. 
+Fungsi ini bukan hanya grid 10x10 dengan emoji yang ditampilkan, 
+tetapi juga informasi pendukung: jumlah pohon untuk setiap kondisi (selamat, terbakar, hangus, padam, basah), 
+posisi dan status truk, target truk saat ini beserta ETA (perkiraan berapa tick lagi truk sampai di target), 
+dan juga sisa tick sampai api menyebar lagi. Tujuan fungsi ini untuk memudahkan pengguna dalam menganalisis 
+apa yang terjadi di tick tersebut tanpa harus mengingat angka-angka sebelumnya.
 
-probabilitas_penyebaran
-Fungsi ini yang menentukan apakah penyebaran api berhasil terjadi atau tidak. Cara
-kerjanya sederhana: ambil angka acak dari 0 sampai 100, lalu bandingkan dengan
-persentase yang diinginkan. Kalau angka acaknya lebih kecil atau sama dengan
-persentase, penyebaran dianggap berhasil. Dengan cara ini, misalnya persentase 30%
-akan benar-benar menghasilkan sekitar 30 keberhasilan dari 100 percobaan.
+ii. cetak_rekap
+Fungsi ini menampilkan rekap akhir setelah simulasi selesai. 
+Rekap terdiri atas total tick yang dibutuhkan, jumlah pohon di setiap kondisi akhir (selamat, padam, basah, hangus), 
+dan persentase masing-masing.
 
-menghitung_skor
-Fungsi ini menghitung seberapa berbahaya sebuah pohon yang sedang terbakar.
-Logikanya: pohon yang dikelilingi banyak pohon sehat lebih berbahaya karena api
-punya lebih banyak pilihan untuk menyebar. Setiap tetangga sehat memberi +1 poin,
-dan kalau tetangga tersebut berada searah dengan angin, poinnya ditambah +2 lagi
-karena api lebih mudah menyebar ke arah itu. Skor ini dipakai sebagai penentu
-terakhir saat ada beberapa pohon terbakar yang jaraknya sama dari truk, supaya truk
-memilih yang paling berpotensi menyebar luas.
+2) Fungsi Perhitungan
 
-mengubah_kondisi_pohon
-Fungsi sederhana yang mengubah kondisi sebuah pohon pada posisi tertentu menjadi
-kondisi baru. Semua perubahan kondisi pohon di program ini selalu lewat fungsi ini
-supaya konsisten dan mudah dilacak.
+i) mencari_jarak
+Fungsi ini digunakan untuk menghitung jarak Manhattan antara dua titik pada grid. 
+Jarak Manhattan diukur berdasarkan jumlah jarak horizontal ditambah jarak vertikal. 
+Fungsi ini digunakan di beberapa situasi, terutama 
+untuk menentukan pohon mana yang paling dekat dengan truk dan untuk menghitung ETA di cetak_grid.
 
-menambahkan_burn_timer
-Fungsi kecil yang menambah burn timer sebuah pohon sebesar 1. Dipanggil setiap tick
-untuk setiap pohon yang berstatus terbakar atau sedang dipadamkan.
+ii) dalam_grid
+Fungsi ini bertugas sebagai pengaman yang memeriksa posisi (baris, kolom) dalam batas grid 10x10. 
+Fungsi ini bertugas untuk memeriksa apakah koordinat yang dimasukkan valid dan memang benar-benar berada di dalam grid. 
+Fungsi ini wajib dipanggil sebelum mengakses grid dengan indeks apapun karena akses di luar batas 
+akan menyebabkan error dan dari sintaks Python itu sendiri, di mana akan mengartikan indeks negatif sebagai akses dari belakang, 
+yang bisa membuat bug sulit dilacak.
 
-mencari_target_pohon
-Fungsi ini yang menentukan pohon mana yang akan dikejar truk berikutnya. Cara
-kerjanya: program menelusuri seluruh grid, dan untuk setiap pohon yang sedang
-terbakar, dihitung jaraknya dari truk dan skor bahayanya. Prioritas utamanya adalah
-jarak terdekat, jadi truk tidak akan menyeberang jauh kalau masih ada api di dekatnya.
-Namun kalau ada beberapa pohon dengan jarak yang sama persis, barulah skor bahaya
-digunakan sebagai penentu, memilih yang paling berbahaya. Fungsi ini mengembalikan
-posisi target, atau -1,-1 kalau ternyata sudah tidak ada pohon terbakar sama sekali.
+iii) probabilitas_penyebaran
+Fungsi ini menentukan apakah penyebaran api berhasil terjadi atau tidak. 
+Fungsi akan mengambil satu angka acak dari 0 sampai 100, lalu membandingkan dengan persentase yang diinginkan. 
+Jika angka acaknya lebih kecil atau sama dengan persentase, penyebaran dianggap berhasil. 
+Dengan cara ini, penentuan penyebaran dengan persentase 30% akan benar-benar menghasilkan sekitar 30 keberhasilan dari 100 percobaan.
 
-tandai_area_pemadaman
-Saat truk tiba di target, fungsi ini dipanggil untuk menandai seluruh area 3x3 di
-sekitar posisi truk. Pohon-pohon yang sedang terbakar di area tersebut diubah menjadi
-sedang dipadamkan, dan pohon-pohon sehat di sekitarnya diubah menjadi basah supaya
-tidak ikut terbakar saat api menyebar berikutnya. Konsep ini mirip dengan cara kerja
-pemadam kebakaran di dunia nyata yang membuat semacam sekat basah di sekitar api.
+iv) menghitung_skor
+Fungsi ini menghitung tingkat bahaya sebuah pohon yang sedang terbakar. 
+Fungsi ini dibangun dengan dasar logika bahwa pohon yang dikelilingi banyak pohon sehat dan banyak pohon yang terbakar lebih berbahaya 
+karena api memiliki lebih banyak pilihan untuk menyebar. Setiap tetangga sehat memberikan +1 poin, dan 
+jika tetangga tersebut berada searah dengan angin, poinnya akan ditambah kembali +1 
+karena api lebih mudah menyebar ke arah tersebut. 
+Selain itu, setiap tetangga yang terbakar akan memberikan +5 poin. 
+Skor ini digunakan sebagai penentu akhir saat terdapat beberapa pohon terbakar yang jaraknya sama dari truk. 
+Fungsi akan memetakan truk agar memilih pohon terbakar yang paling berpotensi menyebar luas.
 
-gerak_truk
-Fungsi ini menggerakkan truk sejauh satu petak menuju target. Prioritasnya adalah
-sumbu baris dulu (naik atau turun menyesuaikan baris target), baru setelah barisnya
-sama, truk bergerak di sumbu kolom (kiri atau kanan). Konsekuensinya, kalau target
-berada diagonal dari truk, truk akan bergerak horizontal dulu sampai sejajar, baru
-kemudian vertikal. Fungsi ini mengembalikan posisi truk yang baru setelah bergerak.
+3) Fungsi Pengubah Data Pohon
 
-menyelesaikan_pemadaman
-Setelah truk memadamkan area selama 3 tick, fungsi ini dipanggil untuk mengubah
-semua pohon yang tadinya berstatus sedang dipadamkan menjadi padam. Dengan begitu,
-pohon-pohon tersebut sudah benar-benar aman dan tidak akan terbakar lagi.
+i) mengubah_kondisi_pohon
+Fungsi ini mengubah kondisi sebuah pohon pada posisi tertentu menjadi kondisi baru. 
+Semua perubahan kondisi pohon di program ini akan selalu melewati fungsi ini agar konsisten dan mudah dilacak.
 
-update_truk
-Ini adalah fungsi pengendali utama truk, semacam otak dari truk pemadam. Fungsi ini
-dipanggil sekali per tick dari main loop. Perilakunya tergantung dari status truk
-saat itu. Kalau statusnya sedang mendatangi pohon, ada beberapa kemungkinan: target
-bisa saja sudah hangus duluan sebelum truk sampai, jadi program mengecek dulu apakah
-target masih valid. Kalau tidak valid, truk mencari target baru. Kalau ternyata
-sudah tidak ada pohon terbakar sama sekali, truk diam di tempat. Kalau target masih
-valid dan truk belum sampai, truk bergerak satu petak. Setelah bergerak, dicek lagi
-apakah sekarang sudah sampai; kalau sudah, langsung mulai memadamkan area. Kalau
-statusnya sedang memadamkan, truk menambah hitungan lama memadamkan, dan setelah
-hitungan mencapai 3, area diselesaikan dan truk siap mencari target baru.
+ii) menambahkan_burn_timer
+Fungsi ini akan menambah burn timer sebuah pohon sebesar 1. 
+Fungsi ini akan dipanggil setiap tick untuk setiap pohon yang berstatus terbakar atau sedang dipadamkan.
+
+4) Fungsi Pengendali Truk Pemadam
+
+i) mencari_target_pohon
+Fungsi ini menentukan pohon berikutnya yang akan menjadi target untuk truk. 
+Fungsi bekerja dengan menelusuri seluruh grid, dan setiap pohon yang sedang terbakar, 
+dilakukan perhitungan jarak dari truk dan skor bahayanya. Prioritas utama adalah jarak terdekat, 
+sehingga truk tidak akan menyeberang jauh jika terdapat api di dekatnya. 
+Namun jika terdapat beberapa pohon dengan jarak yang sama persis, 
+skor bahaya akan digunakan sebagai penentu dengan memilih yang paling berbahaya. 
+Fungsi ini mengembalikan posisi target, atau (-1,-1) jika sudah tidak terdapat pohon yang terbakar.
+
+ii) tandai_area_pemadaman
+Fungsi ini akan dipanggil ketika truk tiba di target untuk menandai seluruh area 3x3 di sekitar posisi truk. 
+Pohon-pohon yang sedang terbakar di area tersebut akan diubah menjadi sedang dipadamkan, 
+dan pohon-pohon sehat di sekitarnya diubah menjadi basah agar tidak ikut terbakar saat api menyebar. 
+Konsep ini mirip dengan cara kerja pemadam kebakaran di dunia nyata yang membuat semacam sekat basah di sekitar api.
+
+iii) gerak_truk
+Fungsi ini menggerakkan truk sejauh satu petak menuju target. Prioritasnya adalah sumbu horizontal dulu (arah kiri atau kanan), 
+lalu truk bergerak di sumbu vertikal (arah atas atau bawah). 
+Konsekuensinya, jika target berada diagonal dari truk, truk akan bergerak horizontal terlebih dahulu hingga sejajar, 
+lalu kemudian bergerak secara vertikal. Fungsi ini mengembalikan posisi truk yang baru setelah truk bergerak.
+
+iv) menyelesaikan_pemadaman
+Fungsi ini dipanggil setelah truk memadamkan area selama 3 tick untuk mengubah semua pohon yang tadinya berstatus sedang dipadamkan menjadi padam. 
+Dengan begitu, pohon-pohon tersebut sudah benar-benar aman dan tidak akan terbakar lagi.
+
+v) update_truk
+Fungsi ini bertugas sebagai pengendali utama truk. 
+Fungsi ini dipanggil sekali per tick dari main loop. 
+Perilakunya tergantung dari status truk saat itu. 
+Jika statusnya sedang mendatangi pohon, maka terdapat beberapa kemungkinan: 
+target bisa saja sudah hangus terlebih dahulu sebelum truk sampai, sehingga program akan melakukan pemindaian terlebih dulu pada kondisi target. 
+Jika kondisi tidak valid, maka truk akan mencari target baru. 
+Jika ternyata sudah tidak terdapat pohon yang terbakar, truk diam di tempat.
+Jika target masih valid dan truk belum sampai, truk bergerak satu petak. 
+Setelah bergerak, fungsi akan melakukan pemindaian pada posisi truk; 
+Jika truk sudah sampai target, maka truk langsung mulai memadamkan area. 
+Jika statusnya sedang memadamkan, truk menambah hitungan lama memadamkan, 
+dan setelah hitungan mencapai 3, area terpadamkan dan truk siap mencari target baru.
+
+5) Fungsi Validasi Input (Tambahan)
 
 check_double_input
-Fungsi ini adalah validator input yang mencegah pengguna memasukkan koordinat titik
-api yang sama dua kali. Kalau koordinat duplikat dibiarkan masuk, pohon yang sama
-akan di-set "terbakar" berulang kali sehingga burn timer, skor bahaya, dan statistik
-rekap akhir bisa kacau. Cara kerjanya: fungsi menerima tiga parameter, yaitu
-titik_api_awal (list koordinat yang sudah tersimpan), serta baris dan kolom
-koordinat baru yang akan dicek. Program menelusuri seluruh isi list dengan indeks i,
-lalu membandingkan setiap elemen dengan [baris, kolom]. Kalau ada satu saja elemen
-yang nilainya sama persis, fungsi langsung mengembalikan True. Kalau penelusuran
-selesai tanpa menemukan kecocokan, fungsi mengembalikan False. Nilai kembalian ini
-dipakai oleh loop input: kalau True, program menampilkan pesan "Maaf, koordinat
-sudah pernah dimasukkan" lalu mengulang permintaan baris dan kolom untuk titik api
-yang sama; kalau False, koordinat baru langsung di-append ke titik_api_awal dan
-lanjut ke titik api berikutnya.
+Fungsi ini adalah validator input yang mencegah pengguna memasukkan koordinat titik api yang sama dua kali. 
+Kalau koordinat duplikat dibiarkan masuk, pohon yang sama akan di-set "terbakar" berulang kali sehingga burn timer, skor bahaya, dan statistik rekap akhir bisa kacau. 
+Cara kerjanya: fungsi menerima tiga parameter, yaitu titik_api_awal (list koordinat yang sudah tersimpan), serta baris dan kolom koordinat baru yang akan dicek. 
+Program menelusuri seluruh isi list dengan indeks i, lalu membandingkan setiap elemen dengan [baris, kolom]. 
+Kalau ada satu saja elemen yang nilainya sama persis, fungsi langsung mengembalikan True. 
+Kalau penelusuran selesai tanpa menemukan kecocokan, fungsi mengembalikan False. 
+Nilai kembalian ini dipakai oleh loop input: kalau True, program menampilkan pesan "Maaf, koordinat sudah pernah dimasukkan" 
+lalu mengulang permintaan baris dan kolom untuk titik api yang sama; kalau False, koordinat baru langsung di-append ke titik_api_awal 
+dan lanjut ke titik api berikutnya.
 
 Validasi Input
-Seluruh pembacaan input pengguna dibungkus while loop agar program tidak pernah
-memakai nilai yang tidak valid. Polanya: minta input, cek syarat, kalau lolos break,
-kalau tidak tampilkan pesan "Maaf, ..." lalu ulangi. Validasi yang dilakukan di
-antaranya: jumlah_titik_api minimal 1; koordinat baris dan kolom truk harus 0 sampai
-9; koordinat baris dan kolom titik api harus 0 sampai 9; dan kombinasi (baris,
-kolom) titik api belum pernah dimasukkan, dicek lewat check_double_input. Khusus
-untuk titik api, validasi baris dan kolom dibungkus satu while loop tambahan yang
-juga menampung pengecekan duplikat, sehingga kalau pengguna memasukkan koordinat
-duplikat, program hanya mengulang pembacaan titik api yang sedang diisi, bukan
-mengulang dari titik api pertama.
+Seluruh pembacaan input pengguna dibungkus while loop agar program tidak pernah memakai nilai yang tidak valid. 
+Polanya: minta input, cek syarat, kalau lolos break, kalau tidak tampilkan pesan "Maaf, ..." lalu ulangi. 
+Validasi yang dilakukan di antaranya: jumlah_titik_api minimal 1; koordinat baris dan kolom truk harus 0 sampai 9; 
+koordinat baris dan kolom titik api harus 0 sampai 9; dan kombinasi (baris, kolom) titik api belum pernah dimasukkan, 
+dicek lewat check_double_input. Khusus untuk titik api, validasi baris dan kolom dibungkus satu while loop tambahan yang juga menampung pengecekan duplikat, 
+sehingga kalau pengguna memasukkan koordinat duplikat, program hanya mengulang pembacaan titik api yang sedang diisi, bukan mengulang dari titik api pertama.
 
-cetak_rekap
-Fungsi ini menampilkan rekap akhir setelah simulasi selesai. Isinya: total tick yang
-dibutuhkan, jumlah pohon di setiap kondisi akhir (selamat, padam, basah, hangus),
-persentase masing-masing, serta verdict akhir berupa MENANG, SERI, atau KALAH. Verdict
-ditentukan dengan membandingkan jumlah pohon yang berhasil diselamatkan (padam ditambah
-basah) terhadap jumlah pohon yang hangus. Kalau yang selamat lebih banyak, hasilnya
-menang. Kalau seimbang, seri. Kalau yang hangus lebih banyak, kalah.
 
 '''
 
