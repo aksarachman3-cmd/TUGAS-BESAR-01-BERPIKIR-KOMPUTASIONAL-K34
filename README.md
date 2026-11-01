@@ -97,12 +97,10 @@ Berikut adalah penjelasan dari fungsi-fungsi yang digunakan dalam program sesuai
 ```text
 .
 ├── README.md
-├── assets/
-│   └── logo.png
 ├── source-code/
 │   └── Python_Tubes.py
 ├── flowchart/
-│   └── (Berkas flowchart)
+│   └── link.md
 ├── ppt/
 │   └── Si Jago Merah - Presentasi.pdf
 └── laporan-akhir/
