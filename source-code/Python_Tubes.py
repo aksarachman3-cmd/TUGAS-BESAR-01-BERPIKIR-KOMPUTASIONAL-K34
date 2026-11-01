@@ -104,7 +104,9 @@ validasi_input                  = konsep validasi nilai yang dimasukkan pengguna
 
 PENJELASAN SUB PROGRAM
 
-Dalam pembuatannya, program ini memanfaatkan sejumlah sub program agar kode tidak menumpuk pada satu bagian saja. Sub program yang digunakan terdiri dari fungsi untuk tampilan, fungsi perhitungan, fungsi pengubah data pohon, serta fungsi pengendali truk pemadam.
+Dalam pembuatannya, program ini memanfaatkan sejumlah sub program agar kode tidak menumpuk pada satu bagian saja. 
+Sub program yang digunakan terdiri dari fungsi untuk tampilan, fungsi perhitungan, fungsi pengubah data pohon, 
+serta fungsi pengendali truk pemadam.
 
 1) Fungsi Tampilan
 
